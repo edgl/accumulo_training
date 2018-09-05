@@ -83,8 +83,6 @@ public class CreateStatTable extends BaseClient {
 
                 conn.tableOperations().attachIterator(tableIndexName, iterSetting);
 
-
-                conn.tableOperations().attachIterator(tableIndexName, iterSetting);
             }
 
             BatchWriter mainTableWriter = multiTableBatchWriter.getBatchWriter(table);
@@ -124,7 +122,7 @@ public class CreateStatTable extends BaseClient {
                 }
 
                 // Add the mutation
-                //mainTableWriter.addMutation(m);
+                mainTableWriter.addMutation(m);
 
                 // Add some information output statements to console
                 if (++sourceRowsWritten % 10000 == 0) {

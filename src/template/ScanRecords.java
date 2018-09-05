@@ -34,31 +34,39 @@ public class ScanRecords extends BaseClient {
         try {
             System.out.println("Zookeepers: " + zookeepers);
             System.out.println("Connecting to accumulo");
-            Instance inst = new ZooKeeperInstance(instanceName, zookeepers);
-            Connector conn = inst.getConnector(username, new PasswordToken(password));
 
-            Scanner scanner = conn.createScanner(table, Authorizations.EMPTY);
+            // Create your instance and connector
+            // Instance inst =
+            // Connector conn =
+
+            // Create a scanner using the connector
+            // Pass in an empty Authorization for now. Use Authorizations.EMPTY
+            // Scanner scanner =
 
             if (row != null) {
-                scanner.setRange(Range.exact(row));
+                // Use the scanner object to set the range
+                // Use an "exact" range
+                // CODE
             }
 
             if (columnFamily != null) {
                 if (columnQualifier != null) {
-                    scanner.fetchColumn(new Text(columnFamily), new Text(columnQualifier));
+                    // Set a column family and a column qualifier
+                    // using the fetcColumn on the scanner
+                    // CODE
                 }
                 else {
-                    scanner.fetchColumnFamily(new Text(columnFamily));
+                    // Set just a column family
+                    // CODE
                 }
             }
 
-            for (Map.Entry<Key, Value> entry : scanner) {
-                System.out.println(
-                        entry.getKey().getRow().toString() + " " +
-                                entry.getKey().getColumnFamily().toString() + " " +
-                                entry.getKey().getColumnQualifier().toString() + "\t" +
-                                new String(entry.getValue().get()));
-            }
+            // Scanner implements in iterator. Iterate
+            // through all the Map entries and display the results in the
+            // console
+            // for (... : scanner) {
+            //    System.out.println(...);
+            //}
 
 
         } catch (AccumuloSecurityException | TableNotFoundException | AccumuloException e) {

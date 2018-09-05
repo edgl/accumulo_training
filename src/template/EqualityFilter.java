@@ -24,18 +24,18 @@ public class EqualityFilter extends Filter {
 
     @Override
     public boolean accept(Key k, Value v) {
-        switch (eqOption) {
-            case "eq":
-                return Double.parseDouble(v.toString()) == value;
-            case "lte":
-                return Double.parseDouble(v.toString()) <= value;
-            case "lt":
-                return Double.parseDouble(v.toString()) < value;
-            case "gt":
-                return Double.parseDouble(v.toString()) > value;
-            case "gte":
-                return Double.parseDouble(v.toString()) >= value;
-        }
+
+        // We'll use a switch option in here
+        // We have listed that it should support 5 filter options
+        // "eg", "lte", "lt", "gt", "gte". Code this below
+        // and provide the actual boolean logic
+        //
+        // EX:
+        // switch (option) {
+        //   case "eg":
+        //      return Double == Double
+        //   ...
+        // }
 
         return false;
     }
@@ -43,8 +43,10 @@ public class EqualityFilter extends Filter {
     @Override
     public IteratorOptions describeOptions() {
         IteratorOptions opts = super.describeOptions();
-        opts.addNamedOption(EQUALITY_OPTION, "Determines what type of inequality to apply. Options are <eq | neq | lt | lte | gt | gte>");
-        opts.addNamedOption(VALUE_OPTION, "Value that will be used to filter based on the " + EQUALITY_OPTION);
+
+        // Add the two options available for this filter. Be sure
+        // to put meaningful descriptions
+        // use opts.addNamedOption()
 
         return opts;
     }
@@ -72,13 +74,16 @@ public class EqualityFilter extends Filter {
 
     }
 
+    /*
+     * Provide static methods for setting the options
+     */
     public static void setEqualityOption(final IteratorSetting setting, String equalityOption) {
         setting.addOption(EQUALITY_OPTION, equalityOption);
     }
 
-    public static void setValueOption(final IteratorSetting setting, Double valueOption) {
-        setting.addOption(EQUALITY_OPTION, valueOption.toString());
-    }
+    // Add the setValueOption here.
+    // CODE
+
 
     @Override
     public void init(SortedKeyValueIterator<Key, Value> source, Map<String, String> options, IteratorEnvironment env) throws IOException {

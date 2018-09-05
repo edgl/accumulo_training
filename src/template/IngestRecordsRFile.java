@@ -48,10 +48,16 @@ public class IngestRecordsRFile extends BaseClient {
 
             int recordsWritten = 0;
             int sourceRowsWritten = 0;
+
+            // RFiles need to be sorted. Since we're not letting
+            // the tablet servers do this for us, we'll have to
+            // do it ourselves
             SortedMap<Key, Value> buffer = new TreeMap<>();
 
             int bufferCounter = 0;
             int fileCounter = 0;
+
+
             String outFile = properties.getProperty(OUTPUT_FILE) + "_" + fileCounter + "." + RFile.EXTENSION;
             FileSKVWriter writer = new RFileOperations().openWriter(outFile, fs, conf, AccumuloConfiguration.getDefaultConfiguration());
             writer.startDefaultLocalityGroup();

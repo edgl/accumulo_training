@@ -40,20 +40,17 @@ public class IngestRecords extends BaseClient {
             System.out.println("Zookeepers: " + zookeepers);
             System.out.println("Connecting to accumulo");
 
-            // First get the instance (use zookeeper)
-            Instance instance = new ZooKeeperInstance(instanceName, zookeepers);
+            // Create an instance
+            // CODE
             System.out.println("Instance");
 
             // Get the connector from the instance
-            Connector conn = instance.getConnector(username, new PasswordToken(password));
-
+            // CODE
             System.out.println("Connector");
 
-            // Create the table if it doesn't exist
-            if(!conn.tableOperations().exists(table)) {
-                System.out.println("Table doesn't exist. Creating table " + table);
-                conn.tableOperations().create(table);
-            }
+            // Create the table IF it doesn't exist
+            // Use table operations
+            // CODE
 
             // Set batchwriter configurations
             BatchWriterConfig config = new BatchWriterConfig();
@@ -62,8 +59,8 @@ public class IngestRecords extends BaseClient {
             config.setMaxWriteThreads(maxThreads);
             config.setMaxLatency(maxLatency, TimeUnit.SECONDS);
 
+
             // Create a batch writer from the connection
-            BatchWriter writer = conn.createBatchWriter(table, config);
 
             System.out.println("writing data from file " + filename + "...");
             final Reader reader = new FileReader(filename);
@@ -73,23 +70,26 @@ public class IngestRecords extends BaseClient {
             int sourceRowsWritten = 0;
             for(final CSVRecord record: csvParser) {
 
-                Mutation m = new Mutation(record.get(CrimeFields.ID.title()));
+                // CREATE A MUTATION and use CrimeFields.ID.title() as the row
+                Mutation m = null; // change
+
+                // Get the Primary Type
                 String primaryType = parseElement(record.get(CrimeFields.PRIMARY_TYPE.title()));
 
+                // Go through all the fields and add them
+                // with "Attribute" colummn family and the field header as the Column
+                // qualifier and the value as the cell value
                 for (CrimeFields CF: CrimeFields.values()) {
-                    Value value;
-                    if (CF == CrimeFields.DATE || CF == CrimeFields.UPDATED_ON)
-                        value = new Value(record.get(CF.title()).getBytes());
-                    else
-                        value = new Value(parseElement(record.get(CF.title())).getBytes());
+                    Value value = null;
 
-                    m.put("Attributes", CF.title(), value);
 
                     if (++recordsWritten % 10000 == 0) {
                         System.out.println("Written " + recordsWritten + " mutations so far...");
                     }
                 }
-                writer.addMutation(m);
+
+                // Add the mutation to the writer
+                // CODE
 
                 if (++sourceRowsWritten % 10000 == 0) {
                     System.out.println("Written " + sourceRowsWritten + " source line records so far... ");
@@ -98,10 +98,10 @@ public class IngestRecords extends BaseClient {
             }
 
             // close the Batch Writer
-            writer.close();
+            // CODE
 
             // close the Input Reader
-            reader.close();
+            // CODE
 
             System.out.println("Written " + recordsWritten + " rows to " + table);
 

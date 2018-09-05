@@ -52,8 +52,10 @@ public class CreateStatTable extends BaseClient {
         try {
             System.out.println("Zookeepers: " + zookeepers);
             System.out.println("Connecting to accumulo");
-            Instance inst = new ZooKeeperInstance(instanceName, zookeepers);
-            Connector conn = inst.getConnector(username, new PasswordToken(password));
+
+            // Create your instance and connector object
+            // Instance inst =
+            // Connector conn =
 
             // Configure a Batch writer here
             BatchWriterConfig bwConfig = new BatchWriterConfig();
@@ -62,9 +64,9 @@ public class CreateStatTable extends BaseClient {
             bwConfig.setMaxLatency(1, TimeUnit.SECONDS);
             bwConfig.setMaxWriteThreads(10);
 
-            MultiTableBatchWriter multiTableBatchWriter = conn.createMultiTableBatchWriter(bwConfig);
+            // Create a multitable bacth writer from the connection object
+            // CODE
 
-            // Create your batch writer here
             String tableIndexName = table + "_index";
 
             if (!conn.tableOperations().exists(table)) {
@@ -76,23 +78,34 @@ public class CreateStatTable extends BaseClient {
                 System.out.println("Creating table " + tableIndexName);
                 conn.tableOperations().create(tableIndexName);
 
-                // remove vers iterator
-                conn.tableOperations().removeIterator(tableIndexName, "vers", EnumSet.allOf(IteratorUtil.IteratorScope.class));
+                // Use the table operations to remove
+                // the versioning interators for all scopes
+                // CODE
 
                 // setup combining iterator
-                IteratorSetting iterSetting = new IteratorSetting(19, "sum", BigDecimalCombiner.BigDecimalSummingCombiner.class);
-                IteratorSetting.Column columnSum = new IteratorSetting.Column("sum");
-                BigDecimalCombiner.setColumns(iterSetting, Arrays.asList(columnSum));
-                BigDecimalCombiner.BigDecimalSummingCombiner.setCombineAllColumns(iterSetting, false);
+                // CODE
+                // 1. Create IteratorSetting object
+                // 2.
+                // 2. Assign BigDecimalCombiner.BigDecimalSummingCombiner.class
+                // 3. Use static functions of the BigDecimalSummingCombiner to set
+                //    properties such as the columns (use the "sum" column) and
+                //    set the combin all columns to 'false'
 
-                conn.tableOperations().attachIterator(tableIndexName, iterSetting);
+
+                // Attach the iterators to the table using the
+                // TableOperations interface available to the connector
 
 
-                conn.tableOperations().attachIterator(tableIndexName, iterSetting);
             }
 
-            BatchWriter mainTableWriter = multiTableBatchWriter.getBatchWriter(table);
-            BatchWriter indexTableWriter = multiTableBatchWriter.getBatchWriter(tableIndexName);
+            // Get a batch writer for the MAIN table
+            // and use the Multitable Batch writer
+            // BatchWriter mainTableWriter =
+
+
+            // Get a batch writer for the MAIN table
+            // and use the Multitable Batch writer
+            // BatchWriter indexTableWriter =
 
 
             int mutationsWritten = 0;
@@ -127,8 +140,7 @@ public class CreateStatTable extends BaseClient {
                         System.out.println("Written " + recordsWritten + " mutations so far...");
                 }
 
-                // Add the mutation
-                //mainTableWriter.addMutation(m);
+                // Add the mutation to the MAIN table batchwriter
 
                 // Add some information output statements to console
                 if (++sourceRowsWritten % 10000 == 0) {
@@ -139,20 +151,21 @@ public class CreateStatTable extends BaseClient {
                 Date date =  SDF.parse(record.get(CrimeFields.DATE.title()));
                 String yearMonthDay = String.format("%04d%02d%02d", date.getYear() + 1900, date.getMonth() + 1, date.getDate());
 
-                Mutation mIdx = new Mutation(yearMonthDay.substring(0, 4));
-                mIdx.put(sumText, primaryType, ONE_VALUE);
-                mIdx.put(avgText, primaryType, ONE_VALUE);
-                indexTableWriter.addMutation(mIdx);
+                // Create mutations with the following rows:
+                // 1. YEAR
+                // 2. YEARMONTH
+                // 3. YEARMONTHDAY
+                // For column family, put the "sum" and for the
+                // value, put in a Value of "1"
 
-                mIdx = new Mutation(yearMonthDay.substring(0, 6));
-                mIdx.put(sumText, primaryType, ONE_VALUE);
-                mIdx.put(avgText, primaryType, ONE_VALUE);
-                indexTableWriter.addMutation(mIdx);
+                // Mutation 1
+                // addMutation to INDEX table batchwriter
 
-                mIdx = new Mutation(yearMonthDay.substring(0, 8));
-                mIdx.put(sumText, primaryType, ONE_VALUE);
-                mIdx.put(avgText, primaryType, ONE_VALUE);
-                indexTableWriter.addMutation(mIdx);
+                // Mutation 2
+                // addMutation to INDEX table batchwriter
+
+                // Mutation 3
+                // addMutation to INDEX table batchwriter
 
                 mutationsWritten++;
 
@@ -161,8 +174,8 @@ public class CreateStatTable extends BaseClient {
                 }
             }
 
-            // Close resources
-            multiTableBatchWriter.close();
+            // Close resources, you only need to close the resources for the
+            // multitable batch writer object
 
             System.out.println("Written a total of " + mutationsWritten + " written to main table");
 
