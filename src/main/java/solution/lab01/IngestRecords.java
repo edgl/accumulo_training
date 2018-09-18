@@ -1,4 +1,4 @@
-package solution;
+package solution.lab01;
 
 import org.apache.accumulo.core.client.*;
 import org.apache.accumulo.core.client.security.tokens.PasswordToken;
@@ -8,6 +8,9 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.log4j.Logger;
+
+import solution.BaseClient;
+import solution.CrimeFields;
 
 import java.io.FileReader;
 import java.io.IOException;
@@ -73,6 +76,7 @@ public class IngestRecords extends BaseClient {
 
             int recordsWritten = 0;
             int sourceRowsWritten = 0;
+            
             for(final CSVRecord record: csvParser) {
 
                 Mutation m = new Mutation(record.get(CrimeFields.ID.title()));

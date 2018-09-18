@@ -28,6 +28,8 @@
                   <include>org.apache.commons:commons-csv</include>
                   <include>com.google.common:guava</include>
                   <include>org.apache.commons:commons-math</include>
+                  <include>org.apache.accumulo:accumulo-core</include>
+                  <include>org.apache.thrift:*</include>
                 </includes>
               </artifactSet>
             </configuration>
@@ -37,12 +39,6 @@
     </plugins>
   </build>
   <dependencies>
-    <dependency>
-      <groupId>org.apache.accumulo</groupId>
-      <artifactId>accumulo-core</artifactId>
-      <version>1.7.0</version>
-      <scope>compile</scope>
-    </dependency>
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>

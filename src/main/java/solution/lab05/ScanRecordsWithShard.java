@@ -1,4 +1,4 @@
-package solution;
+package solution.lab05;
 
 import org.apache.accumulo.core.client.*;
 import org.apache.accumulo.core.client.security.tokens.PasswordToken;
@@ -8,12 +8,14 @@ import org.apache.accumulo.core.data.Value;
 import org.apache.accumulo.core.security.Authorizations;
 import org.apache.hadoop.io.Text;
 
+import solution.BaseClient;
+
 import java.util.Map;
 
-public class ScanRecords extends BaseClient {
+public class ScanRecordsWithShard extends BaseClient {
 
     public static void main(String[] args) {
-        ScanRecords client = new ScanRecords();
+        ScanRecordsWithShard client = new ScanRecordsWithShard();
         client.parseArguments(args);
         client.run();
     }

@@ -122,7 +122,7 @@ public class CreateStatTable extends BaseClient {
                 }
 
                 // Add the mutation
-                mainTableWriter.addMutation(m);
+                //mainTableWriter.addMutation(m);
 
                 // Add some information output statements to console
                 if (++sourceRowsWritten % 10000 == 0) {
@@ -135,17 +135,14 @@ public class CreateStatTable extends BaseClient {
 
                 Mutation mIdx = new Mutation(yearMonthDay.substring(0, 4));
                 mIdx.put(sumText, primaryType, ONE_VALUE);
-                mIdx.put(avgText, primaryType, ONE_VALUE);
                 indexTableWriter.addMutation(mIdx);
 
                 mIdx = new Mutation(yearMonthDay.substring(0, 6));
                 mIdx.put(sumText, primaryType, ONE_VALUE);
-                mIdx.put(avgText, primaryType, ONE_VALUE);
                 indexTableWriter.addMutation(mIdx);
 
                 mIdx = new Mutation(yearMonthDay.substring(0, 8));
                 mIdx.put(sumText, primaryType, ONE_VALUE);
-                mIdx.put(avgText, primaryType, ONE_VALUE);
                 indexTableWriter.addMutation(mIdx);
 
                 mutationsWritten++;

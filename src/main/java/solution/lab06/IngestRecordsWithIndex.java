@@ -1,4 +1,4 @@
-package solution;
+package solution.lab06;
 
 import org.apache.accumulo.core.client.*;
 import org.apache.accumulo.core.client.lexicoder.DateLexicoder;
@@ -8,6 +8,9 @@ import org.apache.accumulo.core.data.Mutation;
 import org.apache.accumulo.core.data.Value;
 import org.apache.accumulo.core.security.Authorizations;
 import org.apache.hadoop.io.Text;
+
+import solution.BaseClient;
+import solution.CrimeFields;
 
 import java.nio.charset.Charset;
 import java.text.ParseException;
@@ -25,7 +28,7 @@ public class IngestRecordsWithIndex extends BaseClient {
     }
 
     private static final DateLexicoder DATE_LEXICODER = new DateLexicoder();
-    private static final SimpleDateFormat SDF = new SimpleDateFormat("MM/dd/yyyyHH:mm:ssa");
+    private static final SimpleDateFormat SDF = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss a");
     private static final Text EMPTY_TEXT = new Text();
 
     public void run() {

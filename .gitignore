@@ -2,3 +2,8 @@ target/
 .DS_Store
 .idea
 *ingestclient-local.properties
+bin/
+.classpath
+.project
+.settings/
+crimes_*.csv

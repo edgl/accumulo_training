@@ -58,8 +58,10 @@ public class IngestRecordsRFile extends BaseClient {
             int fileCounter = 0;
 
 
+            // Create the FileSKVWriter object using the RFileOperations object.
             String outFile = properties.getProperty(OUTPUT_FILE) + "_" + fileCounter + "." + RFile.EXTENSION;
-            FileSKVWriter writer = new RFileOperations().openWriter(outFile, fs, conf, AccumuloConfiguration.getDefaultConfiguration());
+            FileSKVWriter writer = 
+            
             writer.startDefaultLocalityGroup();
             for(final CSVRecord record: csvParser) {
 
@@ -69,11 +71,17 @@ public class IngestRecordsRFile extends BaseClient {
                         writer.append(entry.getKey(), entry.getValue());
                     }
 
-                    writer.close();
+                    // close the writer
+                    //CODE 
+                    
                     fileCounter++;
-                    outFile = properties.getProperty(OUTPUT_FILE) + "_" + fileCounter + "." + RFile.EXTENSION;
-                    writer = new RFileOperations().openWriter(outFile, fs, conf, AccumuloConfiguration.getDefaultConfiguration());
+                    
+                    // Reset the writer (create another FileSKVWriter
+                    outFile = 
+                    writer = 
                     writer.startDefaultLocalityGroup();
+                    
+                    // clear the buffer
                     buffer.clear();
                 }
 
@@ -82,8 +90,9 @@ public class IngestRecordsRFile extends BaseClient {
                 Text row = new Text(record.get(CrimeFields.ID.title()));
 
                 for (CrimeFields CF: CrimeFields.values()) {
-                    Key metaKey = new Key(row, new Text("Attributes"), new Text(CF.title()));
-                    Value value = new Value(parseElement(record.get(CF.title())).getBytes());
+                	// Create the key and value object and put it in the buffer
+                    Key metaKey = 
+                    Value value = 
                     buffer.put(metaKey, value);
 
                     if (++recordsWritten % 10000 == 0) {

@@ -43,7 +43,7 @@ public class ScanRecordsWithAuths extends BaseClient {
         String primaryType = properties.getProperty(PRIMARY_TYPE);
         String auths = properties.getProperty(AUTHS);
 
-        String tableIndexName = "crimes_2014" + "_id_index";
+        String tableIndexName = "crimes" + "_id_index";
 
         try {
             System.out.println("Zookeepers: " + zookeepers);

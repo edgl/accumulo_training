@@ -1,14 +1,16 @@
-package working;
+package solution.lab05;
 
 import org.apache.accumulo.core.client.*;
 import org.apache.accumulo.core.client.security.tokens.PasswordToken;
 import org.apache.accumulo.core.data.Mutation;
 import org.apache.accumulo.core.data.Value;
-import org.apache.accumulo.core.security.ColumnVisibility;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.log4j.Logger;
+
+import solution.BaseClient;
+import solution.CrimeFields;
 
 import java.io.FileReader;
 import java.io.IOException;
@@ -16,13 +18,12 @@ import java.io.Reader;
 import java.text.SimpleDateFormat;
 import java.util.concurrent.TimeUnit;
 
-public class IngestRecordsWithAuths extends BaseClient {
+public class IngestRecordsWithShard extends BaseClient {
 
-    private static final Logger LOGGER = Logger.getLogger(IngestRecordsWithAuths.class.getClass());
+    private static final Logger LOGGER = Logger.getLogger(IngestRecordsWithShard.class.getClass());
     private static final SimpleDateFormat SDF = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss a");
-    
     public static void main(String[] args) {
-        IngestRecordsWithAuths client = new IngestRecordsWithAuths();
+        IngestRecordsWithShard client = new IngestRecordsWithShard();
         client.parseArguments(args);
         client.run();
     }
@@ -35,7 +36,6 @@ public class IngestRecordsWithAuths extends BaseClient {
         String password = properties.getProperty(PASSWORD);
         String table = properties.getProperty(TABLE_NAME);
         String filename = properties.getProperty(INPUT_FILE);
-        String configPrimaryType = properties.getProperty(PRIMARY_TYPE);
 
         int maxLatency = Integer.parseInt(properties.getProperty(MAX_LATENCY, "1"));
         int maxMemory = Integer.parseInt(properties.getProperty(MAX_MEMORY, "10240"));
@@ -78,18 +78,17 @@ public class IngestRecordsWithAuths extends BaseClient {
             int sourceRowsWritten = 0;
             for(final CSVRecord record: csvParser) {
 
-                final Mutation m = new Mutation(record.get(CrimeFields.ID.title()));
-                final String primaryType = parseElement(record.get(CrimeFields.PRIMARY_TYPE.title()));
-
-                final StringBuilder visibilityExpression = new StringBuilder("user");
-                if (primaryType.equalsIgnoreCase(configPrimaryType))
-                    visibilityExpression.append("&").append("detective");
-
-                final ColumnVisibility cv = new ColumnVisibility(visibilityExpression.toString());
+                Mutation m = new Mutation(record.get(CrimeFields.ID.title()));
+                String primaryType = parseElement(record.get(CrimeFields.PRIMARY_TYPE.title()));
 
                 for (CrimeFields CF: CrimeFields.values()) {
-                    Value value = new Value(parseElement(record.get(CF.title())).getBytes());
-                    m.put("Attributes", CF.title(), cv, value);
+                    Value value;
+                    if (CF == CrimeFields.DATE || CF == CrimeFields.UPDATED_ON)
+                        value = new Value(record.get(CF.title()).getBytes());
+                    else
+                        value = new Value(parseElement(record.get(CF.title())).getBytes());
+
+                    m.put("Attributes", CF.title(), value);
 
                     if (++recordsWritten % 10000 == 0) {
                         System.out.println("Written " + recordsWritten + " mutations so far...");

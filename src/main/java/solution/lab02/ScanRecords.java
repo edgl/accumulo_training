@@ -1,13 +1,14 @@
-package working;
+package solution.lab02;
 
 import org.apache.accumulo.core.client.*;
-import org.apache.accumulo.core.client.lexicoder.IntegerLexicoder;
 import org.apache.accumulo.core.client.security.tokens.PasswordToken;
 import org.apache.accumulo.core.data.Key;
 import org.apache.accumulo.core.data.Range;
 import org.apache.accumulo.core.data.Value;
 import org.apache.accumulo.core.security.Authorizations;
 import org.apache.hadoop.io.Text;
+
+import solution.BaseClient;
 
 import java.util.Map;
 
@@ -34,39 +35,31 @@ public class ScanRecords extends BaseClient {
         try {
             System.out.println("Zookeepers: " + zookeepers);
             System.out.println("Connecting to accumulo");
+            Instance inst = new ZooKeeperInstance(instanceName, zookeepers);
+            Connector conn = inst.getConnector(username, new PasswordToken(password));
 
-            // Create your instance and connector
-            // Instance inst =
-            // Connector conn =
-
-            // Create a scanner using the connector
-            // Pass in an empty Authorization for now. Use Authorizations.EMPTY
-            // Scanner scanner =
+            Scanner scanner = conn.createScanner(table, Authorizations.EMPTY);
 
             if (row != null) {
-                // Use the scanner object to set the range
-                // Use an "exact" range
-                // CODE
+                scanner.setRange(Range.exact(row));
             }
 
             if (columnFamily != null) {
                 if (columnQualifier != null) {
-                    // Set a column family and a column qualifier
-                    // using the fetcColumn on the scanner
-                    // CODE
+                    scanner.fetchColumn(new Text(columnFamily), new Text(columnQualifier));
                 }
                 else {
-                    // Set just a column family
-                    // CODE
+                    scanner.fetchColumnFamily(new Text(columnFamily));
                 }
             }
 
-            // Scanner implements in iterator. Iterate
-            // through all the Map entries and display the results in the
-            // console
-            // for (... : scanner) {
-            //    System.out.println(...);
-            //}
+            for (Map.Entry<Key, Value> entry : scanner) {
+                System.out.println(
+                        entry.getKey().getRow().toString() + " " +
+                                entry.getKey().getColumnFamily().toString() + " " +
+                                entry.getKey().getColumnQualifier().toString() + "\t" +
+                                new String(entry.getValue().get()));
+            }
 
 
         } catch (AccumuloSecurityException | TableNotFoundException | AccumuloException e) {

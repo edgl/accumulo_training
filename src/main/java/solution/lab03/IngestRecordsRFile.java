@@ -1,4 +1,4 @@
-package solution;
+package solution.lab03;
 
 import org.apache.accumulo.core.conf.AccumuloConfiguration;
 import org.apache.accumulo.core.data.Key;
@@ -14,6 +14,9 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.io.Text;
 import org.apache.log4j.Logger;
 
+import solution.BaseClient;
+import solution.CrimeFields;
+
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
@@ -26,6 +29,8 @@ public class IngestRecordsRFile extends BaseClient {
 
     private static final Logger LOGGER = Logger.getLogger(IngestRecordsRFile.class.getClass());
     private static final SimpleDateFormat SDF = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss a");
+    
+    
     public static void main(String[] args) {
         IngestRecordsRFile client = new IngestRecordsRFile();
         client.parseArguments(args);
