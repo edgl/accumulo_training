@@ -42,24 +42,49 @@ public class IngestRecordsRFile extends BaseClient {
 
         try {
             String filename = properties.getProperty(INPUT_FILE);
+            String outputFile = properties.getProperty(OUTPUT_FILE);
 
-            Configuration conf = new Configuration();
-            FileSystem fs = FileSystem.get(conf);
+            // create a hadoop configuration object
+            final Configuration conf = new Configuration();
 
+            // create a filesystem obbject using the configuration object
+            // created above
+            final FileSystem fs = FileSystem.get(conf);
 
             System.out.println("writing data from file " + filename + "...");
             final Reader reader = new FileReader(filename);
             final CSVParser csvParser = new CSVParser(reader, CSVFormat.EXCEL.withHeader());
 
+            // Record some metrics
             int recordsWritten = 0;
             int sourceRowsWritten = 0;
-            SortedMap<Key, Value> buffer = new TreeMap<>();
-
             int bufferCounter = 0;
             int fileCounter = 0;
-            String outFile = properties.getProperty(OUTPUT_FILE) + "_" + fileCounter + "." + RFile.EXTENSION;
-            FileSKVWriter writer = new RFileOperations().openWriter(outFile, fs, conf, AccumuloConfiguration.getDefaultConfiguration());
+
+            // create a new RFileOperations object
+            final RFileOperations rFileOperations = new RFileOperations();
+
+            String hdfsOutputFile = outputFile + "_" + fileCounter + "." + RFile.EXTENSION;
+
+            /*
+             * create the FileSKWriter using the RFileOperations.openWriter
+             * object. According to the docs, it requires
+             * a few parameters:
+             *     file - this is the HDFS file it will write to
+             *     FileSystem object
+             *     Hadoop configuration object
+             *     AccumuloConfiguration - use the AccumuloConfiguration.getDefaultConfiguration
+             *
+             */
+            FileSKVWriter writer = rFileOperations.openWriter(hdfsOutputFile, fs, conf, AccumuloConfiguration.getDefaultConfiguration());
+
+            // set the default locality group
             writer.startDefaultLocalityGroup();
+
+
+            // uses a sorted map, call it buffer
+            SortedMap<Key, Value> buffer = new TreeMap<>();
+
             for(final CSVRecord record: csvParser) {
 
                 if (++bufferCounter % 100000 == 0) {
@@ -68,14 +93,25 @@ public class IngestRecordsRFile extends BaseClient {
                         writer.append(entry.getKey(), entry.getValue());
                     }
 
-                    writer.close();
-                    fileCounter++;
-                    outFile = properties.getProperty(OUTPUT_FILE) + "_" + fileCounter + "." + RFile.EXTENSION;
-                    writer = new RFileOperations().openWriter(outFile, fs, conf, AccumuloConfiguration.getDefaultConfiguration());
-                    writer.startDefaultLocalityGroup();
+                    // clear the buffer
                     buffer.clear();
-                }
 
+                    // Close the writer object to create the HDFS file
+                    writer.close();
+
+                    fileCounter++;
+
+                    // we're creating a new file, so increment the filename
+                    hdfsOutputFile = outputFile + "_" + fileCounter + "." + RFile.EXTENSION;
+
+                    // Create a new FileSKWriter object.
+                    // You could reuse the same variable as above
+                    writer = new RFileOperations().openWriter(hdfsOutputFile, fs, conf, AccumuloConfiguration.getDefaultConfiguration());
+
+                    // once again start a new default locality group
+                    writer.startDefaultLocalityGroup();
+
+                }
 
                 String primaryType = parseElement(record.get(CrimeFields.PRIMARY_TYPE.title()));
                 Text row = new Text(record.get(CrimeFields.ID.title()));

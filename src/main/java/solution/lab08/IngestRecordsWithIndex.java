@@ -1,4 +1,4 @@
-package solution.lab06;
+package solution.lab08;
 
 import org.apache.accumulo.core.client.*;
 import org.apache.accumulo.core.client.lexicoder.DateLexicoder;

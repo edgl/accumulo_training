@@ -1,6 +1,7 @@
-package solution.lab05;
+package solution.lab07;
 
 import org.apache.accumulo.core.client.*;
+import org.apache.accumulo.core.client.lexicoder.IntegerLexicoder;
 import org.apache.accumulo.core.client.security.tokens.PasswordToken;
 import org.apache.accumulo.core.data.Key;
 import org.apache.accumulo.core.data.Range;
@@ -10,9 +11,14 @@ import org.apache.hadoop.io.Text;
 
 import solution.BaseClient;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 public class ScanRecordsWithShard extends BaseClient {
+
+    private static final IntegerLexicoder LEXICODER = new IntegerLexicoder();
 
     public static void main(String[] args) {
         ScanRecordsWithShard client = new ScanRecordsWithShard();
@@ -38,22 +44,23 @@ public class ScanRecordsWithShard extends BaseClient {
             Instance inst = new ZooKeeperInstance(instanceName, zookeepers);
             Connector conn = inst.getConnector(username, new PasswordToken(password));
 
-            Scanner scanner = conn.createScanner(table, Authorizations.EMPTY);
+            // Setup a BatchScanner
+            // Batch scanners are more efficient when scanning
+            // many rows that aren't contiguous
+            BatchScanner batchScanner = conn.createBatchScanner(table, Authorizations.EMPTY, 10);
+            batchScanner.setRanges(getListOfRanger(row));
 
-            if (row != null) {
-                scanner.setRange(Range.exact(row));
-            }
 
             if (columnFamily != null) {
                 if (columnQualifier != null) {
-                    scanner.fetchColumn(new Text(columnFamily), new Text(columnQualifier));
+                    batchScanner.fetchColumn(new Text(columnFamily), new Text(columnQualifier));
                 }
                 else {
-                    scanner.fetchColumnFamily(new Text(columnFamily));
+                    batchScanner.fetchColumnFamily(new Text(columnFamily));
                 }
             }
 
-            for (Map.Entry<Key, Value> entry : scanner) {
+            for (Map.Entry<Key, Value> entry : batchScanner) {
                 System.out.println(
                         entry.getKey().getRow().toString() + " " +
                                 entry.getKey().getColumnFamily().toString() + " " +
@@ -61,10 +68,23 @@ public class ScanRecordsWithShard extends BaseClient {
                                 new String(entry.getValue().get()));
             }
 
+            batchScanner.close();
+
 
         } catch (AccumuloSecurityException | TableNotFoundException | AccumuloException e) {
             e.printStackTrace();
         }
+    }
+
+    private List<Range> getListOfRanger(String row) {
+
+        List<Range> ranges = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            Range range = new Range(new Text("0" + i + "_" + row));
+            ranges.add(range);
+        }
+
+        return ranges;
     }
 
 
