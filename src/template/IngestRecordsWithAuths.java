@@ -1,4 +1,4 @@
-package solution;
+package solution.lab12;
 
 import org.apache.accumulo.core.client.*;
 import org.apache.accumulo.core.client.security.tokens.PasswordToken;
@@ -9,6 +9,8 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.log4j.Logger;
+import solution.BaseClient;
+import solution.CrimeFields;
 
 import java.io.FileReader;
 import java.io.IOException;
@@ -80,10 +82,20 @@ public class IngestRecordsWithAuths extends BaseClient {
                 final Mutation m = new Mutation(record.get(CrimeFields.ID.title()));
                 final String primaryType = parseElement(record.get(CrimeFields.PRIMARY_TYPE.title()));
 
-                final StringBuilder visibilityExpression = new StringBuilder("user");
+                // What we'll do is that if this record is marked as
+                // a primary type as given in the properties file, we
+                // will mark this with a sensitive value. For the rest, we'll
+                // mark with sor or "system of record".
+                // Create a String/StringBuilder object where you could define
+                // a default visibility and if the "primaryType" is equal to the
+                // configured primary type you want marked as sensive, you would
+                // append "&senstive" to it.
+                final StringBuilder visibilityExpression = new StringBuilder("sor");
                 if (primaryType.equalsIgnoreCase(configPrimaryType))
-                    visibilityExpression.append("&").append("detective");
+                    visibilityExpression.append("&").append("sensitive");
 
+                // Create a columnvisibility object and pass in the visibilty expression
+                // from above
                 final ColumnVisibility cv = new ColumnVisibility(visibilityExpression.toString());
 
                 for (CrimeFields CF: CrimeFields.values()) {

@@ -1,4 +1,4 @@
-package solution;
+package solution.lab08;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
@@ -10,6 +10,8 @@ import org.apache.accumulo.core.data.Range;
 import org.apache.accumulo.core.data.Value;
 import org.apache.accumulo.core.security.Authorizations;
 import org.apache.hadoop.io.Text;
+import solution.BaseClient;
+import solution.CrimeFields;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -18,56 +20,61 @@ import java.util.Map;
 
 import static com.google.common.collect.Iterables.transform;
 
-public class ScanRecordsWithAuths extends BaseClient {
+public class ScanRecordsWithIndexClient extends BaseClient {
 
+    // Create a static Date lexicoder object
     private static final DateLexicoder DATE_LEXICODER = new DateLexicoder();
+
+    // Create a static SimpleDateFormat object
     private static final SimpleDateFormat SDF = new SimpleDateFormat("MM/dd/yyyy");
 
     public static void main(String[] args) {
-        ScanRecordsWithAuths client = new ScanRecordsWithAuths();
+        ScanRecordsWithIndexClient client = new ScanRecordsWithIndexClient();
         client.parseArguments(args);
         client.run();
     }
 
     public void run() {
 
+        // Our usual properties
         String instanceName = properties.getProperty(INSTANCE);
         String zookeepers = properties.getProperty(ZOOKEEPERS);
         String username = properties.getProperty(USERNAME);
         String password = properties.getProperty(PASSWORD);
         String table = properties.getProperty(TABLE_NAME);
-        String columnFamily = properties.getProperty(COLUMN_FAMILY);
-        String columnQualifier = properties.getProperty(COLUMN_QAULIFIER);
+
+        // These are the start and end dates that is provided
+        // via the properties file
         String startDate = properties.getProperty(START_DATE);
         String endDate = properties.getProperty(END_DATE);
-        String primaryType = properties.getProperty(PRIMARY_TYPE);
-        String auths = properties.getProperty(AUTHS);
 
-        String tableIndexName = "crimes" + "_id_index";
+        // Next we specify what type of
+        String primaryType = properties.getProperty(PRIMARY_TYPE);
+
+        String tableIndexName = table + "_index";
 
         try {
             System.out.println("Zookeepers: " + zookeepers);
             System.out.println("Connecting to accumulo");
-            Instance inst = new ZooKeeperInstance(instanceName, zookeepers);
-            Connector conn = inst.getConnector(username, new PasswordToken(password));
 
-            Authorizations authz = Authorizations.EMPTY;
-            if (auths != null) {
-                authz = new Authorizations(auths.split(","));
-            }
+            // Create the instance and connector objects
+            // CODE
 
-            Scanner scanner = conn.createScanner(tableIndexName, authz);
+            // First create a regular scanner to scan our index table
+            // CODE
 
             // Set the range. Remember this is not an 'exact' range
             // so you have to use the constructor that provides a
-            // start and end range
-            Range ranges = new Range(
-                    new Text(DATE_LEXICODER.encode(SDF.parse(startDate))),
-                    new Text(DATE_LEXICODER.encode(SDF.parse(endDate)))
-            );
+            // start and end range. Range has a contructor that you
+            // could pass in the start and end range as Text objects.
+            // Remember, you'll need to encode the dates the have been
+            // passed in using the Date lexicoder.
+            // DATE_LEXICODER.encode(). You'll also need to convert
+            // the date string into a Java Date object first
+            Range ranges =
 
             // set the range here
-            scanner.setRange(ranges);
+            // CODE
 
 
             // The bottom line here is that you need to
@@ -77,39 +84,40 @@ public class ScanRecordsWithAuths extends BaseClient {
             // to create a batch scanner. There are several ways
             // to do this, and it's up to you on how you would like
             // to implement. HINT: might be helpful to use guava's collections
-            // to perform some transformations on iterables.
-            List<Range> idRanges = Lists.newArrayList(
-                                            transform(scanner,
-                                                new Function<Map.Entry<Key, Value>, Range>() {
-                                                    @Override
-                                                    public Range apply(Map.Entry<Key, Value> input) {
-                                                        Text crimeId = input.getKey().getColumnFamily();
-                                                        return Range.exact(crimeId);
-                                                    }
-                                                }));
+            // to perform some transformations on iterables. Otherwise,
+            // simply use a for loop. If you get stuck, don't hesitate to
+            // look at the solution.
+            List<Range> idRanges =
 
-            scanner.close();
+            // Clean up the resources. We don't need
+            // the scanner anymore. Better close it
+            // CODE
 
-            System.out.println("Found " + idRanges.size() + " records");
+            System.out.println("Found " + idRanges.size() + " records in the index table");
 
             // Setup a BatchScanner
             // Batch scanners are more efficient when scanning
             // many rows that aren't contiguous
-            BatchScanner batchScanner = conn.createBatchScanner(table, authz, 10);
-            batchScanner.setRanges(idRanges);
+            BatchScanner batchScanner =
 
+            // Set the ranges here for the batch scanner found
+            // CODE
+
+            // limit the range to fetch on the Attributes CF and the PRIMARY_TYPE CQ
+            // CODE
+
+            // Create a counter variable.
+            // Remember you'll be getting back the the PRIMARY TYPES which isn't
+            // filtered yet to the one you want. Filter them here and make
+            // sure you sum the results
             int count = 0;
-            for (Map.Entry<Key, Value> entry : batchScanner) {
+            // CODE your for loop here
 
-                if (entry.getKey().getColumnQualifier().toString().equals(CrimeFields.PRIMARY_TYPE.title()) &&
-                    entry.getValue().toString().equals(primaryType)) {
-                    count++;
-                }
-            }
+            // Clean up resources
+            // CODE
 
-            batchScanner.close();
-
-            System.out.println(primaryType + ": " + count);
+            // Print out the results
+            System.out.println("Number of " + primaryType + " from " + startDate + " to " + endDate + ": " + count);
 
 
         } catch (AccumuloSecurityException | TableNotFoundException | AccumuloException e) {

@@ -28,10 +28,9 @@ public class IngestRecordsWithIndex extends BaseClient {
     }
 
     // Create a static date lexicoder
-    private static final DateLexicoder DATE_LEXICODER = new DateLexicoder();
+    // CODE
 
     // Create a private static field here for a simple Date Format.
-    // See if you could determine the format here by going to the shell
     private static final SimpleDateFormat SDF = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss a");
 
 
@@ -41,11 +40,7 @@ public class IngestRecordsWithIndex extends BaseClient {
     public void run() {
 
         // Grab all the necessary properties here
-        String instanceName = properties.getProperty(INSTANCE);
-        String zookeepers = properties.getProperty(ZOOKEEPERS);
-        String username = properties.getProperty(USERNAME);
-        String password = properties.getProperty(PASSWORD);
-        String table = properties.getProperty(TABLE_NAME);
+        // CODE
 
 
         try {
@@ -53,46 +48,39 @@ public class IngestRecordsWithIndex extends BaseClient {
             System.out.println("Connecting to accumulo");
 
             // Normal stuff, create the instance and connector objects
-            Instance inst = new ZooKeeperInstance(instanceName, zookeepers);
-            Connector conn = inst.getConnector(username, new PasswordToken(password));
+            // CODE
 
             // Create a scanner object, we'll use this to
             // iterate our entire dataset. This is not the most
             // effecient ways to do this. Think of the types of bottlenecks
             // that could occur. What type of optimizations do you think can be done?
             // Would mapreduce be a better option?
-            Scanner scanner = conn.createScanner(table, Authorizations.EMPTY);
+            // CODE
 
             // Let's also make sure we fetch the column qualifier for the
             // date field. Use the fetchColumn of the scanner. You could use the
             // CrimeFields.DATE.title() to get the actual text of the CQ that we want
-            scanner.fetchColumn(new Text("Attributes"), new Text(CrimeFields.DATE.title()));
+            // CODE
 
             // Configure a Batch writer here
-            BatchWriterConfig bwConfig = new BatchWriterConfig();
+            // CODE
 
             // Set the durability, maxmemory, maxlatency and the
             // maxwritethreads of the config. Use the default
             // values we've been doing
-            bwConfig.setDurability(Durability.DEFAULT);
-            bwConfig.setMaxMemory(10240);
-            bwConfig.setMaxLatency(1, TimeUnit.SECONDS);
-            bwConfig.setMaxWriteThreads(10);
+            // CODE
 
             // We'll create the index table
             String tableIndexName = table + "_index";
 
             // Create the table if it doesn't exist
-            if (!conn.tableOperations().exists(tableIndexName)) {
-                System.out.println("Creating table " + tableIndexName);
-                conn.tableOperations().create(tableIndexName);
-            }
+            // CODE
 
             // Create a batchwriter object. We'll use this
             // to write to the tables directly? For a big dataset, would this be
             // the most effiecient way? How about writing to a RFile instead?
             // Or using mapreduce? What Input and OutputFormat would you use?
-            BatchWriter writer = conn.createBatchWriter(tableIndexName, bwConfig);
+            // CODE
 
 
             int mutationsWritten = 0;
@@ -106,23 +94,23 @@ public class IngestRecordsWithIndex extends BaseClient {
                 // Use a date lexicoder to encode the date as bytes so we could
                 // use this as our Row. Use the date format to parse the date
                 // String into a Java date object first.
-                byte[] dateBytes = DATE_LEXICODER.encode(SDF.parse(date));
+                byte[] dateBytes =
 
                 // Grab the crime id from the key. They key (crimeId) is
                 // returned as a Text object and since it's encoded as integers
                 // this is safe to convert to a string object
-                String crimeId = entry.getKey().getRow().toString();
+                String crimeId =
 
                 // Create the mutation object. What should be the row?
-                Mutation m = new Mutation(dateBytes);
+                Mutation m =
 
                 // Put the CF, CQ, and VALUE. The CQ and Value
                 // should be empty. Use the private static fields provided
                 // so we don't have to keep reusing it.
-                m.put(new Text(crimeId), EMPTY_TEXT, NULL_VALUE);
+                m.put(/*CODE*/);
 
                 // Now add the mutation to the writer
-                writer.addMutation(m);
+                // CODE
 
                 mutationsWritten++;
 
@@ -132,8 +120,7 @@ public class IngestRecordsWithIndex extends BaseClient {
 
             }
             // Close both the scanner and the writer
-            scanner.close();
-            writer.close();
+            // CODE
 
             System.out.println("Written a total of " + mutationsWritten);
 

@@ -1,4 +1,4 @@
-package working;
+package solution.lab10;
 
 import org.apache.accumulo.core.client.IteratorSetting;
 import org.apache.accumulo.core.data.Key;
@@ -24,29 +24,19 @@ public class EqualityFilter extends Filter {
 
     @Override
     public boolean accept(Key k, Value v) {
-
-        // We'll use a switch option in here
-        // We have listed that it should support 5 filter options
-        // "eg", "lte", "lt", "gt", "gte". Code this below
-        // and provide the actual boolean logic
-        //
-        // EX:
-        // switch (option) {
-        //   case "eg":
-        //      return Double == Double
-        //   ...
-        // }
-
-        return false;
+        // Our filter needs to support several operations.
+        // These are eq for "equals", neq for "not equals",
+        // you get the idea. Think of how you will implement this.
+        // remember the eqOption would have been provided when
+        // the iterator was installed. Use a switch.
+        // CODE
     }
 
     @Override
     public IteratorOptions describeOptions() {
         IteratorOptions opts = super.describeOptions();
-
-        // Add the two options available for this filter. Be sure
-        // to put meaningful descriptions
-        // use opts.addNamedOption()
+        opts.addNamedOption(EQUALITY_OPTION, "Determines what type of inequality to apply. Options are <eq | neq | lt | lte | gt | gte>");
+        opts.addNamedOption(VALUE_OPTION, "Value that will be used to filter based on the " + EQUALITY_OPTION);
 
         return opts;
     }
@@ -74,16 +64,13 @@ public class EqualityFilter extends Filter {
 
     }
 
-    /*
-     * Provide static methods for setting the options
-     */
     public static void setEqualityOption(final IteratorSetting setting, String equalityOption) {
         setting.addOption(EQUALITY_OPTION, equalityOption);
     }
 
-    // Add the setValueOption here.
-    // CODE
-
+    public static void setValueOption(final IteratorSetting setting, Double valueOption) {
+        setting.addOption(EQUALITY_OPTION, valueOption.toString());
+    }
 
     @Override
     public void init(SortedKeyValueIterator<Key, Value> source, Map<String, String> options, IteratorEnvironment env) throws IOException {

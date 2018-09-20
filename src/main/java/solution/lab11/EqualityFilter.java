@@ -1,4 +1,4 @@
-package solution;
+package solution.lab11;
 
 import org.apache.accumulo.core.client.IteratorSetting;
 import org.apache.accumulo.core.data.Key;
@@ -24,6 +24,11 @@ public class EqualityFilter extends Filter {
 
     @Override
     public boolean accept(Key k, Value v) {
+        // Our filter needs to support several operations.
+        // These are eq for "equals", neq for "not equals",
+        // you get the idea. Think of how you will implement this.
+        // remember the eqOption would have been provided when
+        // the iterator was installed. Use a switch.
         switch (eqOption) {
             case "eq":
                 return Double.parseDouble(v.toString()) == value;
